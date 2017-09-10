@@ -21,6 +21,8 @@ public class LettersIncoming : MonoBehaviour {
 	public GameObject keyPrefab;
 	public GameObject keyInvokePrefab;
 	public GameObject keyActionStopPrefab;
+	public GameObject mouseLeftClickPrefab;
+	public GameObject mouseRightClickPrefab;
 
 	public KeyLocationLeader keyLocationLeader;
 	private KeyCode keyCode;
@@ -61,22 +63,41 @@ public class LettersIncoming : MonoBehaviour {
 			char theKey = (char)key;
 			//Instantiate(keyPrefab, new Vector3(1.0f, 1.0f, 0), Quaternion.identity);
 
-			GameObject thePrefab;
+			GameObject thePrefab = null;
 			if (theKey == 'R')
 			{
 				thePrefab = keyInvokePrefab;
 			}
-			else if(theKey == 'S')
+			else if (theKey == 'S')
 			{
 				thePrefab = keyActionStopPrefab;
+			}
+			else if (key == -201)
+			{
+				thePrefab = mouseLeftClickPrefab;
+			}
+			else if (key == -204)
+			{
+				thePrefab = mouseRightClickPrefab;
+			}
+			else if (key == -207)
+			{
+				//thePrefab = mouseRightClickPrefab;
 			}
 			else
 			{
 				thePrefab = keyPrefab;
 			}
 
-			GameObject keyInstance = (GameObject)Instantiate(thePrefab, keyLocationLeader.GetLeaderLocation(), Quaternion.identity);
-			keyInstance.GetComponent<KeyboardKey>().SetKey(key);
+
+			if (thePrefab != null)
+			{
+				Vector3 spawnLocation = keyLocationLeader.GetLeaderLocation();
+
+				// Spawn key prefab
+				GameObject keyInstance = (GameObject)Instantiate(thePrefab, spawnLocation, Quaternion.identity);
+				keyInstance.GetComponent<KeyboardKey>().SetKey(key);
+			}
 		}
 		/*
 		if (GetKeyDownAndWhich())

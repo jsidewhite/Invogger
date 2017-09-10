@@ -37,6 +37,9 @@ public class KeyboardKey : MonoBehaviour {
 		//textMesh.SetText("f : " + sdf());
 		//textMesh.SetText("f : " + GetKey());
 		//textMesh.SetText("f : " + key);
+		if (null == textMesh)
+			return;
+
 		char theChar = (char)key;
 		textMesh.SetText("" + theChar);
 
@@ -77,7 +80,8 @@ public class KeyboardKey : MonoBehaviour {
 		{
 			GetComponent<Rigidbody>().AddForce(new Vector3(-5, -20, 10));
 			GetComponent<Rigidbody>().AddTorque(new Vector3(10, 0, 0));
-			light.intensity = Mathf.Lerp(light.intensity, 0f, Time.deltaTime * 1f);
+			if (light != null)
+				light.intensity = Mathf.Lerp(light.intensity, 0f, Time.deltaTime * 1f);
 		}
 	}
 
@@ -87,6 +91,11 @@ public class KeyboardKey : MonoBehaviour {
 		dying = true;
 		//GetComponent<Rigidbody>().AddTorque(new Vector3(1, 2, 3));
 		//GetComponent<Rigidbody>().AddForce(new Vector3(10000, 2000, 3000));
+		
+		yield return new WaitForSeconds(10f);
+
+		Destroy(gameObject);
+
 		yield return null;
 	}
 }

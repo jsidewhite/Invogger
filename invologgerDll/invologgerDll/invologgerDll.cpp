@@ -1,6 +1,3 @@
-// invologgerDll.cpp : Defines the exported functions for the DLL application.
-//
-
 #include "stdafx.h"
 
 #include <iostream>
@@ -13,23 +10,17 @@
 #include <strsafe.h>
 #include "invologgerDll.h"
 
-
 using namespace std;
 
-
-std::mutex g_i_mutex;  // protects g_i
-//std::vector<int> keyBacklog;
 std::list<int> keyBacklog;
+std::mutex g_keyBackLog_mutex;
 
-HHOOK theHook;
+HHOOK hookHandle_keyPress;
+HHOOK hookHandle_mouseClick;
 
-void ShowGetLastError()
+void WriteGetLastError()
 {
-	// Retrieve the system error message for the last-error code
-
-	wchar_t lpMsgBuf[100] = {'\0'};
-	//lpMsgBuf = 
-	LPVOID lpDisplayBuf;
+	wchar_t buffer[100] = {'\0'};
 	DWORD dw = GetLastError();
 
 	FormatMessageW(
@@ -38,94 +29,67 @@ void ShowGetLastError()
 		NULL,
 		dw,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		lpMsgBuf,
+		buffer,
 		100, NULL);
 
-	// Display the error message and exit the process
-
-	//lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + 40) * sizeof(TCHAR));
-	//StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("Failed with error %d: %s"), dw, lpMsgBuf);
-
-	wcout << L"Error unhooking: " << lpMsgBuf << endl;
-
-	//delete(lpMsgBuf);
-	//LocalFree(lpDisplayBuf);
+	wcout << L"Error message: " << buffer << endl;
 }
 
-LRESULT CALLBACK theHookProc(int code, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK theHookProc_key(int code, WPARAM wParam, LPARAM lParam)
 {
-	std::lock_guard<std::mutex> lock(g_i_mutex);
-	//throw
-	//HandleHotkeySequencePress(VK_F2);
+	std::lock_guard<std::mutex> lock(g_keyBackLog_mutex);
 
-	KBDLLHOOKSTRUCT kbdStruct;
-
-	//cout << "keyCode wParam: " << wParam << endl;
-
-
+	KBDLLHOOKSTRUCT * keyboardInput;
 	if (code >= 0)
 	{
-		// the action is valid: HC_ACTION.
 		if (wParam == WM_KEYDOWN)
 		{
-			// lParam is the pointer to the struct containing the data needed, so cast and assign it to kdbStruct.
-			kbdStruct = *((KBDLLHOOKSTRUCT*)lParam);
-
-			keyBacklog.push_back((int)kbdStruct.vkCode);
-
-			// save to file
-			cout << "keyCode: " << kbdStruct.vkCode  << endl;
-
-
-			/*
-			cout << "about to unhook: " << endl;
-			int uh = Unhook();
-			cout << "just idd the unhook: " << endl;
-			cout << "unhooking: " << uh << endl;
-			*/
+			keyboardInput = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
+			auto keyCode = static_cast<int>(keyboardInput->vkCode);
+			keyBacklog.push_back(keyCode);
+			cout << "keyCode: " << keyCode << endl;
 		}
 	}
-	else
-	{
-		//return CallNextHookEx(theHook, code, wParam, lParam);
-	}
 
-	return CallNextHookEx(theHook, code, wParam, lParam);
-
-	//return CallNextHookEx(theHook, code, wParam, lParam);
-	/*
-
-	UINT keyUint = (UINT)wParam;
-
-	int theKey = (int)keyUint;
-	keyBacklog.push_back(theKey);
-
-	cout << "keyHookProc: " << theKey << endl;
-	//catch_and_show(NULL, [&]() {
-		//throw my_exception(std::to_wstring(key));
-		//HandleHotkeySequencePress(VK_F2);
-	//});
-
-	if (keyBacklog.size() > 0)
-	{
-		//int key = keyBacklog.front();
-		//keyBacklog.pop_front();
-		//cout << "key: " << key << endl;
-		//return key;
-	}
-
-	//cout << "sdfsdf" << endl;
-
-	//return LRESULT{};
-	return CallNextHookEx(theHook, code, wParam, lParam);
-	*/
+	return CallNextHookEx(hookHandle_keyPress, code, wParam, lParam);
 }
 
+LRESULT CALLBACK theHookProc_mouse(int code, WPARAM wParam, LPARAM lParam)
+{
+	MOUSEHOOKSTRUCT * mouseInput = reinterpret_cast<MOUSEHOOKSTRUCT *>(lParam);
+	if (nullptr != mouseInput)
+	{
+		std::lock_guard<std::mutex> lock(g_keyBackLog_mutex);
 
-// This is an example of an exported function.
+		if (wParam == WM_LBUTTONDOWN)
+		{
+			keyBacklog.push_back(-201);
+			cout << "left mouse";
+			cout << ": " << hex << wParam << endl;
+		}
+		else if (wParam == WM_RBUTTONDOWN)
+		{
+			keyBacklog.push_back(-204);
+			cout << "right mouse";
+			cout << ": " << hex << wParam << endl;
+		}
+		else if (wParam == WM_MBUTTONDOWN)
+		{
+			keyBacklog.push_back(-207);
+			cout << "middle mouse";
+			cout << ": " << hex << wParam << endl;
+
+			cout << "keyBacklog size : " << keyBacklog.size() << endl;
+		}
+		
+		//cout << "Mouse position X = " << mouseInput->pt.x << " Mouse Position Y = " << mouseInput->pt.y << endl;
+	}
+	return CallNextHookEx(hookHandle_mouseClick, code, wParam, lParam);
+}
+
 extern "C" __declspec(dllexport) int GetKey(void)
 {
-	std::lock_guard<std::mutex> lock(g_i_mutex);
+	std::lock_guard<std::mutex> lock(g_keyBackLog_mutex);
 
 	// lock
 	if (keyBacklog.size() > 0)
@@ -133,7 +97,8 @@ extern "C" __declspec(dllexport) int GetKey(void)
 		int key = keyBacklog.front();
 		keyBacklog.pop_front();
 		//keyBacklog.pop_back();
-		keyBacklog.empty();
+		//keyBacklog.empty();
+		keyBacklog.clear();
 		return key;
 	}
 	//unlock
@@ -141,18 +106,17 @@ extern "C" __declspec(dllexport) int GetKey(void)
 	return 654;
 }
 
-
-// This is an example of an exported function.
 extern "C" __declspec(dllexport) int SetHooks(void)
 {
-	HOOKPROC hookProc = theHookProc;
+	keyBacklog.clear();
+
 	HINSTANCE hmod = g_hModule;
 	//DWORD dwThreadId = GetCurrentThreadId();
 	DWORD dwThreadId = 0;
 
 
-	theHook = SetWindowsHookEx(WH_KEYBOARD_LL, hookProc, hmod, dwThreadId);
-	if (NULL == theHook)
+	hookHandle_keyPress = SetWindowsHookEx(WH_KEYBOARD_LL, &theHookProc_key, hmod, dwThreadId);
+	if (NULL == hookHandle_keyPress)
 	{
 		HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
 		//DWORD lastError = GetLastError();
@@ -168,15 +132,29 @@ extern "C" __declspec(dllexport) int SetHooks(void)
 		return 99;
 	}
 
+#if 1
+	hookHandle_mouseClick = SetWindowsHookEx(WH_MOUSE_LL,& theHookProc_mouse, hmod, dwThreadId);
+	if (NULL == hookHandle_mouseClick)
+	{
+		HRESULT hr = HRESULT_FROM_WIN32(GetLastError());
+		std::wstringstream ss;
+		ss << "Couldn't register the special Windows hook: 0x" << std::hex << hr << std::endl;
+		return 98;
+	}
+#endif
+
 	return 0;
 }
 
 // This is an example of an exported function.
 extern "C" __declspec(dllexport) int Unhook(void)
 {
-	if (!UnhookWindowsHookEx(theHook))
+	keyBacklog.clear();
+
+	if (!UnhookWindowsHookEx(hookHandle_keyPress))
 	{
-		ShowGetLastError();
+		cout << "Error unhooking:";
+		WriteGetLastError();
 		//DWORD err = HRESULT_FROM_WIN32(GetLastError());
 		//cout << "Error unhooking: " << std::hex << err << endl;
 		return 112;

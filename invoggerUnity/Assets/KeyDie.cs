@@ -25,6 +25,11 @@ public class KeyDie : MonoBehaviour {
 		dying = true;
 		//GetComponent<Rigidbody>().AddTorque(new Vector3(1, 2, 3));
 		//GetComponent<Rigidbody>().AddForce(new Vector3(10000, 2000, 3000));
+
+		yield return new WaitForSeconds(1f);
+
+		Destroy(gameObject);
+
 		yield return null;
 	}
 }
