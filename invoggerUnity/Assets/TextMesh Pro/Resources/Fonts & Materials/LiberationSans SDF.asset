@@ -202,16 +202,16 @@ Material:
       second: {r: 0, g: 0, b: 0, a: 0}
     - first:
         name: _FaceColor
-      second: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+      second: {r: 0.27951992, g: 0.2823589, b: 0.6911765, a: 1}
     - first:
         name: _GlowColor
-      second: {r: 0, g: 0, b: 0, a: 0.5}
+      second: {r: 0, g: 0.21379328, b: 1, a: 0.5}
     - first:
         name: _MaskCoord
       second: {r: 0, g: 0, b: 32767, a: 32767}
     - first:
         name: _OutlineColor
-      second: {r: 0.31617647, g: 0.31617647, b: 0.31617647, a: 0.434}
+      second: {r: 0.31617647, g: 0.3602941, b: 0.5137931, a: 0.434}
     - first:
         name: _ReflectFaceColor
       second: {r: 0, g: 0, b: 0, a: 1}
@@ -220,7 +220,7 @@ Material:
       second: {r: 0, g: 0, b: 0, a: 1}
     - first:
         name: _SpecularColor
-      second: {r: 1, g: 1, b: 1, a: 1}
+      second: {r: 0.11678202, g: 0.37549227, b: 0.88235295, a: 1}
     - first:
         name: _UnderlayColor
       second: {r: 0, g: 0, b: 0, a: 0.5}
