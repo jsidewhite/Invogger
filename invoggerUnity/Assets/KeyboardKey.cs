@@ -118,8 +118,9 @@ public class KeyboardKey : MonoBehaviour {
 	{
 		if (model != null)
 		{
-			Color yellow = new Color(0.9f, 0.9f, 0.1f);
-			Color orig = model.GetComponent<Renderer>().material.GetColor("_EmissionColor");
+			Color yellow = new Color(0.3f, 0.3f, 0.3f, 0.4f);
+			//Color orig = model.GetComponent<Renderer>().material.GetColor("_EmissionColor");
+			Color orig = model.GetComponent<Renderer>().material.GetColor("_Color");
 			//Color orig = new Color(0.0f, 0.9f, 1.0f);
 			Color c;
 			rate = 0.1f;
@@ -149,8 +150,8 @@ public class KeyboardKey : MonoBehaviour {
 				//c = Color.Lerp(orig, yellow, 0f);
 
 				//model.GetComponent<Renderer>().material.SetColor("_EmissionColor", c);
-				//model.GetComponent<Renderer>().material.SetColor("_Color", c);
-				model.GetComponent<Renderer>().material.SetColor("_EmissionColor", c);
+				model.GetComponent<Renderer>().material.SetColor("_Color", c);
+				//model.GetComponent<Renderer>().material.SetColor("_EmissionColor", c);
 				//model.GetComponent<Renderer>().material.SetColor("_Color", c);
 
 				yield return null;
@@ -162,8 +163,8 @@ public class KeyboardKey : MonoBehaviour {
 	private IEnumerator RateIncreaseFunction()
 	{
 		yield return new WaitForSeconds(1.5f);
-		rate += 7f;
+		rate += 4f;
 		yield return new WaitForSeconds(1.5f);
-		rate += 7f;
+		rate += 14f;
 	}
 }
