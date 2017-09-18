@@ -5,9 +5,12 @@ public class KeyLocationLeader : MonoBehaviour {
 
 	public GameObject start;
 	public GameObject end;
-	public float speedMultiplier = 1.0f;
-
+	public float speedMultiplier = 0.75f;
+	public GameObject rowLocationPrefab;
+	
 	private Vector3 leaderLocation;
+	private GameObject currentRow;
+
 	//	bool resetPosition = true;
 
 	float percentage = 0f;
@@ -34,9 +37,14 @@ public class KeyLocationLeader : MonoBehaviour {
 	}
 
 	public Vector3 GetLeaderLocation()
-	{ 
+	{
 		leaderLocation = Vector3.Lerp(start.transform.position, end.transform.position, percentage % 1.0f);
 		return leaderLocation;
+	}
+
+	public Transform GetRowTransform()
+	{
+		return currentRow.transform;
 	}
 
 	public void ResetPosition()
@@ -44,5 +52,7 @@ public class KeyLocationLeader : MonoBehaviour {
 		//resetPosition = true;
 		//leaderLocation = start.transform.position;
 		percentage = 0f;
+		//currentRow = GameObject.CreatePrimitive(PrimitiveType.Cube);
+		currentRow = (GameObject)Instantiate(rowLocationPrefab, GetLeaderLocation(), Quaternion.identity);
 	}
 }

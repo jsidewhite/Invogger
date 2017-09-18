@@ -95,7 +95,8 @@ public class LettersIncoming : MonoBehaviour {
 				Vector3 spawnLocation = keyLocationLeader.GetLeaderLocation();
 
 				// Spawn key prefab
-				GameObject keyInstance = (GameObject)Instantiate(thePrefab, spawnLocation, Quaternion.identity);
+				//GameObject keyInstance = (GameObject)Instantiate(thePrefab, spawnLocation, Quaternion.identity);
+				GameObject keyInstance = (GameObject)Instantiate(thePrefab, spawnLocation, Quaternion.identity, keyLocationLeader.GetRowTransform());
 				keyInstance.GetComponent<KeyboardKey>().SetKey(key);
 			}
 		}
